@@ -1,0 +1,321 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "assistente-pessoal",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        48,
+        -64
+      ],
+      "id": "7d1e16c5-0f93-4367-8ae1-dcc4220fe944",
+      "name": "Webhook",
+      "webhookId": "REPLACE_WITH_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.mensagem }}",
+        "options": {
+          "systemMessage": "=# PERSONA\nVocê é o \"AlonsoBot\", o assistente virtual inteligente do desenvolvedor Rafael Alonso. Sua missão é apresentar o trabalho, as habilidades e os projetos do Rafael para recrutadores e clientes em potencial. Você é profissional, proativo, levemente bem-humorado e focado em converter conversas em oportunidades de trabalho.\n\n# DIRETRIZES DE RESPOSTA\n1. **Foco Total:** Responda apenas sobre carreira, projetos, tecnologias, educação e experiências profissionais do Rafael.\n2. **Uso de Ferramentas (Obrigatório):**\n   - **Stack/Habilidades:** Se perguntarem \"o que ele sabe\" ou \"qual a stack\", use a tool `Tecnologias`.\n   - **Projetos/Portfólio:** Se perguntarem \"o que ele já fez\" ou \"mostre projetos\", use a tool `Projetos`.\n   - **Histórico/Empresas:** Se perguntarem \"onde ele já trabalhou\" ou \"experiência profissional\", use a tool `Experiencias`.\n3. *Cruzamento de Dados:** Se perguntarem sobre uma tecnologia específica (ex: React), consulte `Tecnologias` para confirmar o nível e `Experiencias` ou `Projetos` para citar onde ele aplicou. Se perguntarem detalhes de um projeto, apresente as informações do README.\n4. **Fallback (Não sei a resposta):** Se a pergunta for sobre o Rafael, mas você não tiver o dado, diga: \"Essa informação é tão exclusiva que nem eu tenho no meu banco de dados! Que tal entrar em contato com o Rafael pelo Linkedin: https://www.linkedin.com/in/rafael-alonso-5b5099207/?\"\n4. **Negativa com Humor:** Para perguntas fora do escopo, responda com humor:\n   - \"Eu adoraria fofocar, mas o Rafael me programou focado apenas em conseguir um emprego incrível para ele. Vamos falar do código dele?\"\n\n# CONVERSÃO (CALL TO ACTION)\nAo final de interações positivas, sugira que o usuário entre em contato pelo LinkedIn para uma entrevista.\n\n# FORMATO\nUse Markdown para estruturar as respostas (negrito para tecnologias, listas para projetos). Mantenha as respostas concisas e diretas."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        400,
+        -64
+      ],
+      "id": "e6203177-d5bf-45e8-af94-702e4831707f",
+      "name": "AI Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        224,
+        192
+      ],
+      "id": "808177d3-8c02-4908-b113-98d62d2a99bb",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "REPLACE_WITH_GOOGLE_GEMINI_CREDENTIAL_ID",
+          "name": "REPLACE_WITH_GOOGLE_GEMINI_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.chatId }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        176
+      ],
+      "id": "20dd6232-7d32-4593-a22e-c95fda55f18d",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "tecnologias",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        656,
+        176
+      ],
+      "id": "765fb7bf-e2f6-4410-bfe5-adec8f0f9161",
+      "name": "Tecnologias",
+      "credentials": {
+        "supabaseApi": {
+          "id": "REPLACE_WITH_SUPABASE_CREDENTIAL_ID",
+          "name": "REPLACE_WITH_SUPABASE_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "projetos",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        768,
+        176
+      ],
+      "id": "b84886ee-a20e-407b-813b-2870ee342ef4",
+      "name": "Projetos",
+      "credentials": {
+        "supabaseApi": {
+          "id": "REPLACE_WITH_SUPABASE_CREDENTIAL_ID",
+          "name": "REPLACE_WITH_SUPABASE_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1328,
+        -160
+      ],
+      "id": "9b14e1ba-cd9b-4dd4-b875-b9f5c6daeb22",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1328,
+        32
+      ],
+      "id": "086db2af-3d18-4c45-af81-17f2554da7c1",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ccf26ad5-88f0-444f-a70e-c801cfa5ee48",
+              "name": "resposta",
+              "value": "\"Ops! O AlonsoBot gastou todos os neurônios (e créditos) por hoje.Por favor, tente falar diretamente com o Rafael Alonso no LinkedIn enquanto eu recarrego as energias!\"",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1008,
+        32
+      ],
+      "id": "d741906b-a83e-4134-a37d-597a15c080c5",
+      "name": "Erro"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a997d375-3de5-4d94-932c-a12547b337cc",
+              "name": "resposta",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1008,
+        -160
+      ],
+      "id": "887c02c7-7d52-4c53-a113-74e149352fb7",
+      "name": "deu certo"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "experiencias",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        544,
+        176
+      ],
+      "id": "2eb50d26-6d43-4be6-8737-c3a87d2ca87b",
+      "name": "Experiencia",
+      "credentials": {
+        "supabaseApi": {
+          "id": "REPLACE_WITH_SUPABASE_CREDENTIAL_ID",
+          "name": "REPLACE_WITH_SUPABASE_CREDENTIAL_NAME"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "deu certo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tecnologias": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Projetos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Erro": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "deu certo": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Experiencia": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "REPLACE_WITH_INSTANCE_ID"
+  }
+}
